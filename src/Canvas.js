@@ -9,9 +9,18 @@ const Canvas = (props) => {
   
 
   const bg = new Image();   // Create new img element
-  let gravity = 9.8;
-  let accel =0;
-  let timepassed = 0;
+  let physics ={
+  'gravity' : 9.8,
+  'accel' : 0,
+  'timepassed' : 0
+  }
+ let gamestate={
+  '1':'start',
+  '2':'lost'
+ }
+  let botheight =350;
+
+
   let pos = 500; 
   let ypos = 450;//object pos
   let starty= 450;
@@ -19,6 +28,9 @@ const Canvas = (props) => {
   let key = false;
   const canvasRef = useRef(null)
 
+  let counter  =  (oldcount)=>{
+    return oldcount+1
+  }; 
   const draw = (ctx, startpos) => {//caled once to create object
    
     ctx.fillStyle = '#000000'
@@ -27,102 +39,102 @@ const Canvas = (props) => {
     ctx.fill()  
     return ctx;
   }
-  const update = (newctx,newpos)=>{//called repeatedly to change objects properties
+  const update = (newctx)=>
+  {//called repeatedly to change ctx properties
     console.log("(x,y)=("+pos + "," + ypos+")")
-    if(key=getSpace()){
-      setInterval(function(){ 
-        accel = gravity*=timepassed;
-        timepassed++
-    }, 2000);
-        
-      if(ypos>=jump(starty) && ypos<=1000){//max
-        
-          
-          newctx.fillStyle = '#000000'
-          newctx.beginPath()
-          newctx.arc(pos, ypos-=5*accel, 20*Math.sin(360)**2, 0, 2*Math.PI)
-          newctx.fill()
+    let top = ypos>=jump(starty) 
+    let bot= ypos<1050
 
-
-          if( key ){
-            newctx.fillStyle = '#000000'
-          newctx.beginPath()
-          newctx.arc(pos, ypos+=5*-accel, 20*Math.sin(360)**2, 0, 2*Math.PI)
-          newctx.fill()
-          }
-          
-      }
-      
-      else{
-      
-          newctx.fillStyle = '#000000'
-          newctx.beginPath()
-          newctx.arc(pos, ypos+=5, 20*Math.sin(360)**2, 0, 2*Math.PI)
-          newctx.fill()
-          key =-key
-      }
-    }
-    else{ 
-      newctx.fillStyle = '#000000'
-          newctx.beginPath()
-          newctx.arc(pos, ypos+=5, 20*Math.sin(360)**2, 0, 2*Math.PI)
-          newctx.fill()
-          key =-key
-    }
+    if('start'==gamestate[1]){
+    newctx.beginPath()
+    newctx.fillText("Press Space", 0, 0, 1000)
     
-  }
-
-  let Xpos=2000,YposBot=905,YposTop = 505;
+    }
+    if(top && bot ) 
+    { 
+      newctx.fillStyle = '#000000'
+      newctx.beginPath()
+      newctx.arc(pos, ypos+=5, 20*Math.sin(360)**2, 0, 2*Math.PI)
+      newctx.fill()
+    }
+    if(!top){
+      newctx.fillStyle = '#000000'
+      newctx.beginPath()
+      newctx.arc(pos, ypos=jump(starty)+20, 20*Math.sin(360)**2, 0, 2*Math.PI)
+      newctx.fill()
+    }
+    if(!bot){
+      newctx.fillStyle = '#000000'
+      newctx.beginPath()
+      newctx.arc(pos, ypos-=5, 20*Math.sin(360)**2, 0, 2*Math.PI)
+      newctx.fill()
+    }
+    if(key=getSpace())
+    {
+      newctx.fillStyle = '#000000'
+      newctx.beginPath()
+      newctx.arc(pos, ypos-=15, 20*Math.sin(360)**2, 0, 2*Math.PI)
+      newctx.fill()
+    
+  }  
+ }
+  let Xpos=2000,YposBot=1080,YposTop = 0;
+  let randheight = 200
  console.log("the ypos is :"+YposBot)
     const obstBot = (ctx) =>{ 
-        
+      
         console.log("CREATED BOTTOM PIPE ___________| |__________")
+        
         ctx.fillStyle = '#100000'
         ctx.beginPath()
         ctx.fillRect(Xpos, YposBot, 100, 200);
         ctx.fill()  
+        
         return ctx;
     }
     const obstTop = (ctx) =>{ 
+      randheight = (Math.random()* (150)+200)//right now the heights are symmetrical
       
-        ctx.fillStyle = '#000000'
+      ctx.fillStyle = '#000000'
         ctx.beginPath()
-        ctx.fillRect(Xpos, YposTop, 100, 200);
+        ctx.fillRect(Xpos, YposTop, 100, randheight);
         ctx.fill()  
         return ctx;
     }
     const updateTop=(ctx,pos)=>{
-
+     
       if(Xpos>=-100){
         ctx.fillStyle = "#FF0000";
         ctx.beginPath()
-        ctx.fillRect(Xpos-=pos, YposTop, 100, 200);
+        ctx.fillRect(Xpos-=pos, YposTop, 100, randheight);
         ctx.fill()
+        counter(1)
       }  
       else{
-        YposTop =(Math.random() * (560 - 200) + 200)
-        Xpos=2000
+        randheight = (Math.random() * (150)+ 200)
+        botheight=randheight+ 250  
+        Xpos=2000-pos
         ctx.fillStyle = '#000000'
         ctx.beginPath()
-        ctx.fillRect(Xpos-=pos, YposTop, 100, 200);
+        ctx.fillRect(Xpos, YposTop, 100, randheight);
         ctx.fill()
       }
 
     }
     const updateBot=(ctx,pos)=>{
+   
       if(Xpos>=-100){
         ctx.fillStyle = "#FF0000";
         ctx.beginPath()
-        ctx.fillRect(Xpos-=pos, YposBot, 100, 200);
+        console.log( "the val of botheight is : "+ -botheight)
+        ctx.fillRect(Xpos-=pos, YposBot, 100, -botheight);
         ctx.fill()  
       }
       else{
-        YposBot=(Math.random() * (1000 - 705) + 705)
-        ctx.beginPath()
-        ctx.fillRect(Xpos-=pos, YposBot, 100, 200);
+        ctx.beginPath()       
+        ctx.fillRect(Xpos-=pos, YposBot, 100, -botheight);
         ctx.fill()  
       }
- 
     }
     
 // bird moves in x dir when game state is on
@@ -155,9 +167,8 @@ const Canvas = (props) => {
       
     context.drawImage(bg,window.screen.width,window.screen.height)
     console.log(bg)
-    let animationFrameId
 
-    
+    let animationFrameId
     
     let newctx =draw(context,pos)
     let pipeBot = obstBot(context)
@@ -168,17 +179,16 @@ const Canvas = (props) => {
     const render = () => {
 
       let newx = 0//xpos(pos,frameCount)
-      if(getSpace()){
-        const height=jump(ypos)
-      }
-     
-      newctx.clearRect(0, 0, newctx.canvas.width, newctx.canvas.height)
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height)
       
      
       context.drawImage(bg,0,0,window.screen.width,window.screen.height)  
-      update(newctx,newx)//bird
+      update(newctx)//bird
       updateTop(pipeBot,2)
       updateBot(pipeTop,2)
+      
+      
+ 
       
     
       animationFrameId = window.requestAnimationFrame(render)
@@ -191,10 +201,10 @@ const Canvas = (props) => {
   }, [draw,obstBot,obstTop])
   
   return <div>
-    <h1>Developed By Jress</h1> 
+    <h1>Developed By Jrres</h1> 
         <canvas ref={canvasRef}  {...props}/>
         <Spacebar />
-
+        <h1>{"level " + counter(0)}</h1> 
         </div>
 }
 export default Canvas 
