@@ -1,5 +1,13 @@
 # Getting Started with Create React App
 
+
+
+
+
+in order to access the branch use all git commands required to properly get into this branch
+Tutorial: 
+https://stackoverflow.com/questions/67699/how-do-i-clone-all-remote-branches
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
